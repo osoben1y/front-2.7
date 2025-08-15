@@ -1,8 +1,9 @@
 import { useState } from "react";
 import UserList from "./components/UsersList";
 import UserForm from "./components/UserForm";
+import { memo } from 'react';
 
-export default function App() {
+const App = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   return (
@@ -15,4 +16,6 @@ export default function App() {
       <UserList onEdit={(id) => setEditingId(id)} />
     </div>
   );
-}
+};
+
+export default memo(App);

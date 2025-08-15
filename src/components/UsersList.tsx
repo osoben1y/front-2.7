@@ -7,7 +7,7 @@ const UserList = ({ onEdit }: { onEdit: (id: string) => void }) => {
   const deleteUser = useDeleteUser();
   const [search, setSearch] = useState("");
 
-  if (isLoading) return <p className="text-center text-[#948979]">Loading...</p>;
+  if (isLoading) return <p className="text-center text-gray-500">Loading...</p>;
   if (isError) return <p className="text-center text-red-500">Error loading users</p>;
 
   const filteredUsers = users?.filter((user) =>
@@ -15,52 +15,49 @@ const UserList = ({ onEdit }: { onEdit: (id: string) => void }) => {
   );
 
   return (
-    <div className="container mx-auto">
+    <div className="min-h-screen bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 p-6">
       <div className="flex justify-center mb-6">
         <div className="relative w-full sm:w-2/3 lg:w-1/2">
-          <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[#948979]" />
+          <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-full bg-[#393e46] text-[#dfd0b8] placeholder-[#948979] shadow-lg focus:outline-none focus:ring-4 focus:ring-[#948979] focus:ring-opacity-40 transition duration-300"
+            className="w-full pl-12 pr-4 py-3 rounded-full bg-white text-gray-900 placeholder-gray-400 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-40 transition duration-300"
           />
         </div>
       </div>
-
       <div className="grid place-items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredUsers?.map((user) => (
           <div
             key={user.id}
-            className="relative bg-[#222831] h-[290px] w-[265px] rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 group"
+            className="relative bg-white rounded-xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 w-[265px]"
           >
-            <span className="absolute -inset-0.5 rounded-lg bg-[conic-gradient(from_0deg,_#dfd0b8,_#948979,_#393e46,_#dfd0b8)] opacity-0 group-hover:opacity-100 animate-spin-slow pointer-events-none"></span>
-
-            <div className="relative z-10 bg-[#222831] h-full w-full rounded-lg p-3 flex flex-col justify-between">
-              <img
-                src={user.image}
-                alt={user.name}
-                className="w-full h-[160px] object-cover rounded-t-lg"
-              />
-              <div>
-                <h3 className="text-base font-bold text-[#dfd0b8] truncate">{user.name}</h3>
-                <p className="text-xs text-[#948979] truncate">{user.email}</p>
-                <p className="text-xs text-[#948979] truncate">{user.address}</p>
-                <p className="text-xs text-[#948979]">
+            <img
+              src={user.image}
+              alt={user.name}
+              className="w-full h-[200px] object-cover rounded-t-xl"
+            />
+            <div className="p-5 flex flex-col justify-between h-[180px]">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-gray-800 truncate">{user.name}</h3>
+                <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                <p className="text-sm text-gray-500 truncate">{user.address}</p>
+                <p className="text-sm text-gray-500">
                   {new Date(user.birthdate).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-3 mt-4">
                 <button
                   onClick={() => onEdit(user.id)}
-                  className="flex-1 bg-[#393e46] hover:bg-[#4f5561] text-[#dfd0b8] px-2 py-1 rounded-md text-sm transition"
+                  className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm transition"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => deleteUser.mutate(user.id)}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-md text-sm transition"
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition"
                 >
                   Delete
                 </button>
@@ -70,7 +67,7 @@ const UserList = ({ onEdit }: { onEdit: (id: string) => void }) => {
         ))}
 
         {filteredUsers?.length === 0 && (
-          <p className="text-[#948979] col-span-full">No users found.</p>
+          <p className="text-gray-500 col-span-full text-center mt-4">No users found.</p>
         )}
       </div>
     </div>

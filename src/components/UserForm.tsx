@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { useCreateUser, useUpdateUser, useUser } from "../hooks/users";
 import type { UserInput } from "../types/user";
 
@@ -7,12 +10,17 @@ interface UserFormProps {
   onFinishEdit: () => void;
 }
 
+const schema = yup.object({
+  name: yup.string().required("Ismingizni kiriting"),
+  email: yup.string().email("To'g'ri email kiriting").required("Emailingizni kiriting"),
+  address: yup.string().required("Manzilingizni kiriting"),
+  birthdate: yup.string().required("Tug‘ilgan kuningizni kiriting"),
+}).required();
+
 const UserForm = ({ editingId, onFinishEdit }: UserFormProps) => {
-  const [form, setForm] = useState<UserInput>({
-    name: "",
-    email: "",
-    address: "",
-    birthdate: "",
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<UserInput>({
+    resolver: yupResolver(schema),
+    mode: "onBlur",
   });
 
   const createUser = useCreateUser();
@@ -23,91 +31,69 @@ const UserForm = ({ editingId, onFinishEdit }: UserFormProps) => {
 
   useEffect(() => {
     if (userToEdit) {
-      setForm({
-        name: userToEdit.name,
-        email: userToEdit.email,
-        address: userToEdit.address,
-        birthdate: userToEdit.birthdate,
-      });
-    } else if (!editingId) {
-      setForm({ name: "", email: "", address: "", birthdate: "" });
+      setValue("name", userToEdit.name);
+      setValue("email", userToEdit.email);
+      setValue("address", userToEdit.address);
+      setValue("birthdate", userToEdit.birthdate);
+    } else {
+      reset({ name: "", email: "", address: "", birthdate: "" });
     }
-  }, [userToEdit, editingId]);
+  }, [userToEdit, editingId, reset, setValue]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = (data: UserInput) => {
     if (isEditing && editingId) {
       updateUser.mutate(
-        { id: editingId, data: form },
-        {
-          onSuccess: () => {
-            onFinishEdit();
-            setForm({ name: "", email: "", address: "", birthdate: "" });
-          },
-        }
+        { id: editingId, data },
+        { onSuccess: () => { onFinishEdit(); reset(); } }
       );
     } else {
-      createUser.mutate(form, {
-        onSuccess: () => {
-          setForm({ name: "", email: "", address: "", birthdate: "" });
-        },
-      });
+      createUser.mutate(data, { onSuccess: () => reset() });
     }
   };
 
+  const getInputClass = (error?: string) =>
+    `w-full p-3 mb-4 rounded-lg shadow-sm border focus:outline-none focus:ring-2 ${
+      error ? "border-red-400 focus:ring-red-300" : "border-gray-300 focus:ring-indigo-400"
+    } bg-gray-50 text-gray-900 placeholder-gray-400`;
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-6 bg-[#222831] shadow-lg rounded-xl"
-    >
-      <h2 className="text-xl font-bold mb-4 text-[#dfd0b8]">
-        {isEditing ? "Edit User" : "Add User"}
-      </h2>
+    <div className="flex justify-center items-center  min-h-screen bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 p-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
+        <h2 className="text-2xl font-extrabold text-gray-800 mb-6 text-center">{isEditing ? "Edit User" : "Add User"}</h2>
 
-      <input
-        className="border border-[#393e46] bg-[#393e46] text-[#dfd0b8] p-2 w-full mb-3 rounded-md focus:outline-none focus:ring-2 focus:ring-[#948979]"
-        placeholder="Name"
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-      />
-      <input
-        className="border border-[#393e46] bg-[#393e46] text-[#dfd0b8] p-2 w-full mb-3 rounded-md focus:outline-none focus:ring-2 focus:ring-[#948979]"
-        placeholder="Email"
-        value={form.email}
-        onChange={(e) => setForm({ ...form, email: e.target.value })}
-      />
-      <input
-        className="border border-[#393e46] bg-[#393e46] text-[#dfd0b8] p-2 w-full mb-3 rounded-md focus:outline-none focus:ring-2 focus:ring-[#948979]"
-        placeholder="Address"
-        value={form.address}
-        onChange={(e) => setForm({ ...form, address: e.target.value })}
-      />
-      <input
-        type="date"
-        className="border border-[#393e46] bg-[#393e46] text-[#dfd0b8] p-2 w-full mb-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#948979]"
-        value={form.birthdate}
-        onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
-      />
+        <div>
+          <input {...register("name")} placeholder="Name" className={getInputClass(errors.name?.message)} />
+          {errors.name && <p className="text-red-500 text-sm -mt-3 mb-2">{errors.name.message}</p>}
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="bg-[#948979] hover:bg-[#a89c8e] text-[#222831] px-4 py-2 rounded-md transition"
-        >
-          {isEditing ? "Update" : "Create"}
-        </button>
-        {isEditing && (
+          <input {...register("email")} placeholder="Email" className={getInputClass(errors.email?.message)} />
+          {errors.email && <p className="text-red-500 text-sm -mt-3 mb-2">{errors.email.message}</p>}
+
+          <input {...register("address")} placeholder="Address" className={getInputClass(errors.address?.message)} />
+          {errors.address && <p className="text-red-500 text-sm -mt-3 mb-2">{errors.address.message}</p>}
+
+          <input {...register("birthdate")} type="date" className={getInputClass(errors.birthdate?.message)} />
+          {errors.birthdate && <p className="text-red-500 text-sm -mt-3 mb-4">{errors.birthdate.message}</p>}
+        </div>
+
+        <div className="flex gap-3 mt-4">
           <button
-            type="button"
-            onClick={onFinishEdit}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
+            type="submit"
+            className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 rounded-lg transition-all shadow-md"
           >
-            Cancel
+            {isEditing ? "Update" : "Create"}
           </button>
-        )}
-      </div>
-    </form>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={onFinishEdit}
+              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-semibold py-3 rounded-lg transition-all shadow-md"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 };
 
