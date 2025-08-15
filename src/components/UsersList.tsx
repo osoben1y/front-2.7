@@ -17,7 +17,6 @@ const UserList = ({ onEdit }: { onEdit: (id: string) => void }) => {
 
   return (
     <div className="w-full">
-      {/* Search */}
       <div className="flex justify-center mb-8">
         <div className="relative w-full sm:w-2/3 md:w-1/2 lg:w-1/3">
           <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
@@ -30,8 +29,6 @@ const UserList = ({ onEdit }: { onEdit: (id: string) => void }) => {
           />
         </div>
       </div>
-
-      {/* Users grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 place-items-center">
         {filteredUsers?.map(user => (
           <div
